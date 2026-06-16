@@ -41,10 +41,11 @@ jobs:
       run: |
         npm run build --if-present
 
-    # 6. مزامنة ونقل كود الويب والأيقونات الحديثة إلى منصة الأندرويد (تم التعديل لتفادي خطأ npx)
+    # 6. إضافة منصة الأندرويد ومزامنة كود الويب الحديث (تم التعديل لتجنب خطأ المنصة المفقودة)
     - name: Sync Capacitor to Android Platform
       run: |
         npm install @capacitor/cli @capacitor/core
+        npx cap add android || true
         npx cap sync android
 
     # 7. تطبيق الإعدادات المتوافقة وسحق الملفات المتكررة والتالفة تلقائياً
