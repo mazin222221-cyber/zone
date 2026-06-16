@@ -23,7 +23,7 @@ jobs:
         java-version: '21'
         distribution: 'zulu'
 
-    # 3. إعداد بيئة Node.js حديثة وتفعيل كاش npm تلقائياً لتجنب تعارضات ملفات القفل
+    # 3. إعداد بيئة Node.js حديثة وتفعيل كاش npm تلقائياً
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
@@ -41,9 +41,10 @@ jobs:
       run: |
         npm run build --if-present
 
-    # 6. مزامنة ونقل كود الويب والأيقونات الحديثة إلى منصة الأندرويد
+    # 6. مزامنة ونقل كود الويب والأيقونات الحديثة إلى منصة الأندرويد (تم التعديل لتفادي خطأ npx)
     - name: Sync Capacitor to Android Platform
       run: |
+        npm install @capacitor/cli @capacitor/core
         npx cap sync android
 
     # 7. تطبيق الإعدادات المتوافقة وسحق الملفات المتكررة والتالفة تلقائياً
