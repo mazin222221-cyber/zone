@@ -1,0 +1,8 @@
+{
+  "name": "Aura AI Makeover",
+  "description": "Interactive room makeover app. Transform uploaded space photos into stylish designs with comparison slider and shoppable chat helper.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
