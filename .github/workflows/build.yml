@@ -23,15 +23,18 @@ jobs:
         java-version: '21'
         distribution: 'zulu'
 
-    # 3. إعداد بيئة Node.js لتشغيل أدوات التجميع وكاباسيتور
+    # 3. إعداد بيئة Node.js حديثة وتفعيل كاش npm تلقائياً لتجنب تعارضات ملفات القفل
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
+        cache: 'npm'
 
-    # 4. تثبيت مكتبات المشروع الأساسية
+    # 4. تنظيف الحزم القديمة تماماً وتثبيت المكتبات بشكل نقي ومتوافق مع السيرفر
     - name: Install Project Dependencies
-      run: npm install --legacy-peer-deps
+      run: |
+        rm -rf node_modules package-lock.json
+        npm install --legacy-peer-deps
 
     # 5. بناء كود الويب المحدث لضمان دمج آخر التعديلات
     - name: Build Web Application
@@ -79,24 +82,20 @@ jobs:
         sudo apt-get update && sudo apt-get install -y imagemagick
         
         echo "Locating the master high-resolution icon..."
-        # تحديد المسار الذهبي لأيقونتك المرفوعة من جوجل استوديو
         MASTER_ICON="android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png"
         
-        # التحقق الوقائي: إذا لم تكن في مجلد xxxhdpi، نبحث عنها في المجلدات الأخرى للإمساك بها
         if [ ! -f "$MASTER_ICON" ]; then
           MASTER_ICON=$(find android/app/src/main/res/mipmap-* -name "ic_launcher.png" | head -n 1)
         fi
         
         if [ -f "$MASTER_ICON" ]; then
           echo "Master Icon Detected Successfully at: $MASTER_ICON"
-          # تنظيف بايتات الأيقونة المصدر وحفظ نسخة مؤقتة نقية تماماً
           convert "$MASTER_ICON" -strip png24:master_clean.png
         else
           echo "Critical Warning: Master icon not found in repository. Using backup canvas."
           convert -size 512x512 xc:"#1B5E20" -strip png24:master_clean.png
         fi
 
-        # دالة ذكية لإعادة تحجيم وتوليد كافة أشكال الأيقونات (العادية، الدائرية، والأمامية) من تصميمك الأصلي
         deploy_icon_dimension() {
           local folder_name="$1"
           local dimension="$2"
@@ -112,14 +111,12 @@ jobs:
           chmod 664 "$target_dir"/ic_launcher*.png
         }
 
-        # تطبيق الهوية وتعميمها على جميع كثافات أندرويد الرسمية لضمان ظهورها على كل الهواتف
         deploy_icon_dimension "mipmap-mdpi" 48
         deploy_icon_dimension "mipmap-hdpi" 72
         deploy_icon_dimension "mipmap-xhdpi" 96
         deploy_icon_dimension "mipmap-xxhdpi" 144
         deploy_icon_dimension "mipmap-xxxhdpi" 192
         
-        # تنظيف وتطهير بقية شاشات الـ Splash لتعبر الـ AAPT2 بسلام
         find android/app/src/main/res/ -name "splash.png" | while read -r splash; do
           if [ -f "$splash" ]; then
             convert "$splash" -strip png24:temp_splash.png 2>/dev/null || true
